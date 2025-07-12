@@ -1,0 +1,11 @@
+{
+"rules": [
+{
+"primary-output": "CMakeFiles/GL_UI.dir/io/io.cpp.o",
+"requires": [
+]
+}
+],
+"version": 0,
+"revision": 0
+}

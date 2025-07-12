@@ -1,0 +1,7 @@
+ToDos:
+- Add universally shared vram block to store screen size
+- Render partial circles
+- Render shadows
+- Render UI buttons
+- Render UI textinput
+- Render text (bitmap font)
