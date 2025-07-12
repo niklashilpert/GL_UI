@@ -34,14 +34,12 @@ namespace gl {
         DrawCall(int dataSize, unsigned int VBO, unsigned int VAO, const Shader *shader, const int drawMode);
         ~DrawCall();
         void draw() const;
+    private:
         int dataSize;
         unsigned int VBO;
         unsigned int VAO;
         const Shader *shader;
         int drawMode;
-
-    private:
-
     };
 
     unsigned int createVBO(const std::vector<float> &data);

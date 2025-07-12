@@ -38,7 +38,6 @@ unsigned int gl::createVBO(const std::vector<float> &data) {
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(data.size() * sizeof(float)), data.data(), GL_STATIC_DRAW);
-    std::cout << "Created VBO with size " << data.size() * sizeof(float) << std::endl;
     return VBO;
 }
 
