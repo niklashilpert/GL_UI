@@ -3,9 +3,9 @@ layout (location = 0) in vec3 inPos;
 layout (location = 1) in vec4 inColor;
 layout (location = 2) in float inRadius;
 
-uniform int screenWidth;
-uniform int screenHeight;
-
+layout(std140, binding = 0) uniform ScreenSize {
+    vec2 viewportSize;
+};
 out vec4 vColor;
 out vec2 vRadius;
 
@@ -13,7 +13,7 @@ const mat2 TRANSFORM = mat2(2, 0, 0, -2);
 
 // Transforms absolute pixel coords into relative coords.
 vec2 toRelativeCoords(vec2 coords) {
-    return vec2(coords.x / screenWidth, coords.y / screenHeight);
+    return vec2(coords.x / viewportSize.x, coords.y / viewportSize.y);
 }
 
 // Transforms top-left relative coords into GL-coords.
@@ -26,6 +26,6 @@ void main()
     vec2 transformedPos = toGLCoords(toRelativeCoords(vec2(inPos.x, inPos.y)));
 
     gl_Position = vec4(transformedPos, inPos.z, 1);
-    vRadius = vec2(inRadius / screenWidth, inRadius / screenHeight);
+    vRadius = vec2(inRadius / viewportSize.x, inRadius / viewportSize.y);
     vColor = inColor;
 }

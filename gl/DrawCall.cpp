@@ -26,6 +26,10 @@ void gl::DrawCall::draw() const {
     glBindVertexArray(this->VAO);
     shader->bind();
     glDrawArrays(this->drawMode, 0, this->dataSize);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    glUseProgram(0);
 }
 
 

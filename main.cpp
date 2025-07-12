@@ -13,6 +13,7 @@
 #include <thread>
 
 #include "gl/DrawCall.h"
+#include "gl/UniformBufferObject.h"
 #include "window/Window.h"
 
 
@@ -20,6 +21,7 @@ int main() {
     const Window window(800, 800, "OpenGL - Test");
 
     gl::initShaders();
+    const auto viewportSizeUBO = gl::ScreenSizeUBO();
 
     std::vector lines = {
         gl::Line(
@@ -49,7 +51,7 @@ int main() {
         )
     };
 
-    /*for (int i = 0; i < 0; i++) {
+    for (int i = 0; i < 100; i++) {
         lines.push_back(gl::Line(
             glm::vec3(
                 700 + sinf(M_PI * 2.0f * i / 100) * 300,
@@ -62,7 +64,7 @@ int main() {
                 0
                 ),
             glm::vec4(1, 1, 1, 1),
-            50.0f
+            100.0f
         ));
 
         circles.push_back(gl::Circle(
@@ -73,7 +75,7 @@ int main() {
             glm::vec4(1, 1, 1, 1),
             50
         ));
-    }*/
+    }
 
     const auto *lineCall   = gl::createLineDrawCall(lines);
     const auto *circleCall = gl::createCircleDrawCall(circles);
@@ -85,13 +87,7 @@ int main() {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        const int width = window.getWidth();
-        const int height = window.getHeight();
-
-        gl::LINE_SHADER->setInt("screenWidth", width);
-        gl::LINE_SHADER->setInt("screenHeight", height);
-        gl::CIRCLE_SHADER->setInt("screenWidth", width);
-        gl::CIRCLE_SHADER->setInt("screenHeight", height);
+        viewportSizeUBO.setSize(window.getWidth(), window.getHeight());
 
         lineCall->draw();
         circleCall->draw();

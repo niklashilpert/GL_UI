@@ -4,8 +4,9 @@ layout (location = 1) in vec3 inPos2;
 layout (location = 2) in vec4 inColor;
 layout (location = 3) in float inWidth;
 
-uniform int screenWidth;
-uniform int screenHeight;
+layout(std140, binding = 0) uniform ScreenSize {
+    vec2 viewportSize;
+};
 
 out vec3 vPos1;
 out vec3 vPos2;
@@ -16,7 +17,7 @@ const mat3 TRANSFORM = mat3(2, 0, 0, 0, -2, 0, 0, 0, 1);
 
 // Transforms absolute pixel coords into relative coords.
 vec3 toRelativeCoords(vec3 coords) {
-    return vec3(coords.x / screenWidth, coords.y / screenHeight, coords.z);
+    return vec3(coords.x / viewportSize.x, coords.y / viewportSize.y, coords.z);
 }
 
 // Transforms top-left relative coords into GL-coords.
@@ -32,5 +33,5 @@ void main()
 
     vec3 orthDirection = cross(vec3(0, 0, 1), vPos2 - vPos1);
     vec3 orthPixel = normalize(orthDirection) * (inWidth / 2);
-    vOrthogonal = orthPixel / vec3(screenWidth, screenHeight, 1);
+    vOrthogonal = orthPixel / vec3(viewportSize.x, viewportSize.y, 1);
 }
