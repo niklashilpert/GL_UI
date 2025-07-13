@@ -13,24 +13,60 @@ gl::DrawCall::DrawCall(const int dataSize, const unsigned int VBO, const unsigne
     VBO(VBO),
     VAO(VAO),
     shader(shader),
-    drawMode(drawMode){}
+    drawMode(drawMode),
+    offset(glm::vec3(0, 0, 0)),
+    parent(nullptr) {}
+
+gl::DrawCall::DrawCall(const DrawCall *drawCall):
+    dataSize(drawCall->dataSize),
+    VBO(drawCall->VBO),
+    VAO(drawCall->VAO),
+    shader(drawCall->shader),
+    drawMode(drawCall->drawMode),
+    offset(glm::vec3(0, 0, 0)),
+    parent(drawCall) {}
+
 
 gl::DrawCall::~DrawCall() {
+    if (parent) {
+        delete parent;
+        parent = nullptr;
+    }
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
 }
 
-
-void gl::DrawCall::draw() const {
+void gl::DrawCall::bind() const {
     glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
     glBindVertexArray(this->VAO);
     shader->bind();
-    glDrawArrays(this->drawMode, 0, this->dataSize);
+    shader->setFloat3("uOffset", offset.x, offset.y, offset.z);
+}
 
+void gl::DrawCall::unbind() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
     glUseProgram(0);
 }
+
+
+void gl::DrawCall::draw() const {
+    bind();
+    glDrawArrays(this->drawMode, 0, this->dataSize);
+    unbind();
+}
+
+
+gl::MandelbrotDrawCall::MandelbrotDrawCall(const std::vector<Rectangle> &rectangles, glm::vec2 center, float zoom, int iterationCount):
+    DrawCall(createMandelbrotDrawCall(rectangles)), center(center), zoom(zoom), iterationCount(iterationCount) {}
+
+void gl::MandelbrotDrawCall::bind() const {
+    DrawCall::bind();
+    shader->setFloat2("uCenter", this->center.x, this->center.y);
+    shader->setFloat("uZoom", this->zoom);
+    shader->setInt("uIterationCount", this->iterationCount);
+}
+
 
 
 unsigned int gl::createVBO(const std::vector<float> &data) {
@@ -69,7 +105,7 @@ unsigned int gl::createVAO(const std::vector<ShaderVariable> &vars) {
     return VAO;
 }
 
-gl::DrawCall *gl::createLineDrawCall(std::vector<Line> &lines) {
+gl::DrawCall *gl::createLineDrawCall(const std::vector<Line> &lines) {
     std::vector<float> data;
     for (auto [startPosition, endPosition, color, thickness] : lines) {
         data.push_back(startPosition.x);
@@ -98,9 +134,9 @@ gl::DrawCall *gl::createLineDrawCall(std::vector<Line> &lines) {
     return new DrawCall(size, VBO, VAO, shader, GL_POINTS);
 }
 
-gl::DrawCall *gl::createCircleDrawCall(std::vector<Circle> &circles) {
+gl::DrawCall *gl::createCircleDrawCall(const std::vector<Circle> &circles) {
     std::vector<float> data;
-    for (auto [position, color, radius] : circles) {
+    for (auto [position, color, outerRadius, innerRadius, angleBounds] : circles) {
         data.push_back(position.x);
         data.push_back(position.y);
         data.push_back(position.z);
@@ -108,17 +144,66 @@ gl::DrawCall *gl::createCircleDrawCall(std::vector<Circle> &circles) {
         data.push_back(color.g);
         data.push_back(color.b);
         data.push_back(color.a);
-        data.push_back(radius);
+        data.push_back(outerRadius);
+        data.push_back(innerRadius);
+        data.push_back(angleBounds.x);
+        data.push_back(angleBounds.y);
     }
 
     const int size = static_cast<int>(data.size());
     const unsigned int VBO = createVBO(data);
     const unsigned int VAO = createVAO({
-       ShaderVariable(3, GL_FLOAT), // Position
-       ShaderVariable(4, GL_FLOAT), // Color
-       ShaderVariable(1, GL_FLOAT), // Radius
+        ShaderVariable(3, GL_FLOAT), // Position
+        ShaderVariable(4, GL_FLOAT), // Color
+        ShaderVariable(1, GL_FLOAT), // Outer Radius
+        ShaderVariable(1, GL_FLOAT), // Inner Radius
+        ShaderVariable(2, GL_FLOAT), // Angle Bounds
+
    });
     const Shader *shader = CIRCLE_SHADER;
 
     return new DrawCall(size, VBO, VAO, shader, GL_POINTS);
+}
+
+gl::DrawCall *gl::createMandelbrotDrawCall(const std::vector<Rectangle> &rectangles) {
+    std::vector<float> data;
+    for (auto [corner1, corner2, z] : rectangles) {
+        float topLeft_x = corner1.x < corner2.x ? corner1.x : corner2.x;
+        float topLeft_y = corner1.y < corner2.y ? corner1.y : corner2.y;
+        float bottomRight_x = corner1.x > corner2.x ? corner1.x : corner2.x;
+        float bottomRight_y = corner1.y > corner2.y ? corner1.y : corner2.y;
+
+        data.push_back(topLeft_x);
+        data.push_back(topLeft_y);
+        data.push_back(z);
+
+        data.push_back(topLeft_x);
+        data.push_back(bottomRight_y);
+        data.push_back(z);
+
+        data.push_back(bottomRight_x);
+        data.push_back(bottomRight_y);
+        data.push_back(z);
+
+        data.push_back(topLeft_x);
+        data.push_back(topLeft_y);
+        data.push_back(z);
+
+        data.push_back(bottomRight_x);
+        data.push_back(bottomRight_y);
+        data.push_back(z);
+
+        data.push_back(bottomRight_x);
+        data.push_back(topLeft_y);
+        data.push_back(z);
+    }
+
+    const int size = static_cast<int>(data.size());
+    const unsigned int VBO = createVBO(data);
+    const unsigned int VAO = createVAO({
+        ShaderVariable(3, GL_FLOAT), // Position
+   });
+    const Shader *shader = MANDELBROT_SHADER;
+
+    return new DrawCall(size, VBO, VAO, shader, GL_TRIANGLES);
 }

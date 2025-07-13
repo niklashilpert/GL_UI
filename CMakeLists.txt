@@ -24,6 +24,8 @@ add_executable(GL_UI
         gl/TextureInstance.h
         gl/DrawCall.cpp
         gl/DrawCall.h
+        gl/DrawGroup.cpp
+        gl/DrawGroup.h
         gl/UniformBufferObject.cpp
         gl/UniformBufferObject.h
         io/stb_image.h

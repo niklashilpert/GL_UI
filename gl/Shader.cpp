@@ -100,6 +100,11 @@ namespace gl {
         glUseProgram(id);
     }
 
+    void Shader::setFloat2(const std::string &name, const float value1, const float value2) const {
+        bind();
+        glUniform2f(glGetUniformLocation(id, name.c_str()), value1, value2);
+    }
+
     void Shader::setFloat3(const std::string &name, const float value1, const float value2, const float value3) const {
         bind();
         glUniform3f(glGetUniformLocation(id, name.c_str()), value1, value2, value3);
@@ -147,19 +152,31 @@ namespace gl {
             }
         );
     }
+    Shader *loadMandelbrotShader() {
+        return new Shader(
+        {
+            MANDELBROT_VERTEX_SHADER_FILE,
+            MANDELBROT_FRAGMENT_SHADER_FILE
+            }
+        );
+    }
+
 
     void initShaders() {
         TEXtURE_SHADER = loadTextureShader();
         LINE_SHADER = loadLineShader();
         CIRCLE_SHADER = loadCircleShader();
+        MANDELBROT_SHADER = loadMandelbrotShader();
     }
 
     void deinitShaders() {
         delete TEXtURE_SHADER;
         delete LINE_SHADER;
         delete CIRCLE_SHADER;
+        delete MANDELBROT_SHADER;
         TEXtURE_SHADER = nullptr;
         LINE_SHADER = nullptr;
         CIRCLE_SHADER = nullptr;
+        MANDELBROT_SHADER = nullptr;
     }
 }

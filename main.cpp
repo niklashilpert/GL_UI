@@ -23,7 +23,7 @@ int main() {
     gl::initShaders();
     const auto viewportSizeUBO = gl::ScreenSizeUBO();
 
-    std::vector lines = {
+    /*std::vector lines = {
         gl::Line(
             glm::vec3(100, 100, 0),
             glm::vec3(1300, 100, 0),
@@ -32,54 +32,39 @@ int main() {
         )
     };
 
-
     std::vector circles = {
         gl::Circle(
         glm::vec3(100, 100, 0),
         glm::vec4(1, .5, 1, 1),
-        50
+        50,
+        0,
+        glm::vec2(0, 1)
         ),
         gl::Circle(
         glm::vec3(1300, 100, 0),
         glm::vec4(1, .5, 1, 1),
-        50
+        50,
+        0,
+        glm::vec2(0, 1)
         ),
         gl::Circle(
             glm::vec3(700, 700, 0),
         glm::vec4(1, 1, 1, 1),
-        100
+        300,
+        250,
+        glm::vec2(0, 1)
         )
+    };*/
+
+    std::vector mandelbrot = {
+        gl::Rectangle(
+            glm::vec3(0, 0, 0),
+            glm::vec3(1400, 1400, 0))
     };
 
-    for (int i = 0; i < 100; i++) {
-        lines.push_back(gl::Line(
-            glm::vec3(
-                700 + sinf(M_PI * 2.0f * i / 100) * 300,
-                700 + cosf(M_PI * 2.0f * i / 100) * 300,
-                0
-                ),
-            glm::vec3(
-                700 + sinf(M_PI * 2.0f * (i+1) / 100) * 300,
-                700 + cosf(M_PI * 2.0f * (i+1) / 100) * 300,
-                0
-                ),
-            glm::vec4(1, 1, 1, 1),
-            100.0f
-        ));
-
-        circles.push_back(gl::Circle(
-        glm::vec3(
-            700 + sinf(2.0f * M_PI * i / 100) * 300,
-            700 + cosf(2.0f * M_PI * i / 100) * 300,
-            0),
-            glm::vec4(1, 1, 1, 1),
-            50
-        ));
-    }
-
-    const auto *lineCall   = gl::createLineDrawCall(lines);
-    const auto *circleCall = gl::createCircleDrawCall(circles);
-
+    //const auto *lineCall   = gl::createLineDrawCall(lines);
+    //const auto *circleCall = gl::createCircleDrawCall(circles);
+    const auto *mandelbrotCall = new gl::MandelbrotDrawCall(mandelbrot, glm::vec2(-.5, 0), 1, 50);
 
 
     while (!window.should_close()) {
@@ -89,20 +74,17 @@ int main() {
 
         viewportSizeUBO.setSize(window.getWidth(), window.getHeight());
 
-        lineCall->draw();
-        circleCall->draw();
-
-        const double startTime = glfwGetTime();
+        //lineCall->draw();
+        //circleCall->draw();
+        mandelbrotCall->bind();
+        mandelbrotCall->draw();
 
         window.updateBuffers();
         Window::updateEvents();
-
-        const double endTime = glfwGetTime();
-        //std::cout << round((endTime - startTime) * 1000000) / 1000 << " ms" << std::endl;
-
     }
 
-    delete circleCall;
-    delete lineCall;
+    //delete circleCall;
+    //delete lineCall;
+    delete mandelbrotCall;
     gl::deinitShaders();
 }

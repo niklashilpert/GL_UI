@@ -23,7 +23,14 @@ namespace gl {
     struct Circle {
         glm::vec3 position;
         glm::vec4 color;
-        float radius;
+        float outerRadius;
+        float innerRadius;
+        glm::vec2 angleBounds;
+    };
+    struct Rectangle {
+        glm::vec2 corner1; // TOP LEFT
+        glm::vec2 corner2; // TOP RIGHT
+        float z;
     };
 
     /**
@@ -32,21 +39,39 @@ namespace gl {
     class DrawCall {
     public:
         DrawCall(int dataSize, unsigned int VBO, unsigned int VAO, const Shader *shader, const int drawMode);
+        explicit DrawCall(const DrawCall *drawCall);
         ~DrawCall();
+        void bind() const;
+        static void unbind();
         void draw() const;
-    private:
+        void setOffset(const glm::vec3 &offset);
+    protected:
         int dataSize;
         unsigned int VBO;
         unsigned int VAO;
         const Shader *shader;
         int drawMode;
+        glm::vec3 offset;
+    private:
+        const DrawCall *parent;
+    };
+
+    class MandelbrotDrawCall : public DrawCall {
+    public:
+        explicit MandelbrotDrawCall(const std::vector<Rectangle> &rectangles, glm::vec2 center, float zoom, int iterationCount);
+        void bind() const;
+    private:
+        glm::vec2 center;
+        float zoom;
+        int iterationCount;
     };
 
     unsigned int createVBO(const std::vector<float> &data);
     unsigned int createVAO(const std::vector<ShaderVariable> &vars);
 
-    DrawCall *createLineDrawCall(std::vector<Line> &lines);
-    DrawCall *createCircleDrawCall(std::vector<Circle> &circles);
+    DrawCall *createLineDrawCall(const std::vector<Line> &lines);
+    DrawCall *createCircleDrawCall(const std::vector<Circle> &circles);
+    DrawCall *createMandelbrotDrawCall(const std::vector<Rectangle> &rectangles);
 }
 
 #endif //RENDERCALL_H

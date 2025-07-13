@@ -20,12 +20,16 @@ namespace gl {
     const std::string CIRCLE_GEOMETRY_SHADER_FILE = "resources/shaders/circle/shader.geom";
     const std::string CIRCLE_FRAGMENT_SHADER_FILE = "resources/shaders/circle/shader.frag";
 
+    const std::string MANDELBROT_VERTEX_SHADER_FILE = "resources/shaders/mandelbrot/shader.vert";
+    const std::string MANDELBROT_FRAGMENT_SHADER_FILE = "resources/shaders/mandelbrot/shader.frag";
+
     class Shader {
     public:
         explicit Shader(const std::vector<std::string> &paths);
         ~Shader();
         void bind() const;
 
+        void setFloat2(const std::string& name, float value1, float value2) const;
         void setFloat3(const std::string& name, float value1, float value2, float value3) const;
         void setBool(const std::string& name, bool value) const;
         void setInt(const std::string& name, int value) const;
@@ -42,6 +46,7 @@ namespace gl {
     inline const Shader *TEXtURE_SHADER;
     inline const Shader *LINE_SHADER;
     inline const Shader *CIRCLE_SHADER;
+    inline const Shader *MANDELBROT_SHADER;
 
 }
 
